@@ -1,0 +1,30 @@
+export const PREFIX = {
+  ROOT: "/",
+  PRODUCTS: "/products",
+  CATEGORIES: "/categories",
+  BRANDS: "/brands",
+  ATTRIBUTES: "/attributes",
+  ORDERS: "/orders",
+  COUPONS: "/coupons",
+  CONTENT: "/content",
+  PAGES: "/content/pages",
+  BANNERS: "/content/banners",
+  SETTINGS: "/settings",
+  SYSTEM: "/system",
+};
+
+export const ROUTES = {
+  overview: PREFIX.ROOT,
+  productsList: PREFIX.PRODUCTS,
+  productNew: `${PREFIX.PRODUCTS}/new`,
+  productEdit: (id = ":id") => `${PREFIX.PRODUCTS}/${id}`,
+  categories: PREFIX.CATEGORIES,
+  brands: PREFIX.BRANDS,
+  attributes: PREFIX.ATTRIBUTES,
+  orders: PREFIX.ORDERS,
+  coupons: PREFIX.COUPONS,
+  pages: PREFIX.PAGES,
+  banners: PREFIX.BANNERS,
+  settings: PREFIX.SETTINGS,
+  system: PREFIX.SYSTEM,
+};
