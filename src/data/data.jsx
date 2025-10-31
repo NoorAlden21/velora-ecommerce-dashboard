@@ -1,4 +1,5 @@
-export const PREFIX = {
+// src/data/data.jsx
+const P = {
   ROOT: "/",
   PRODUCTS: "/products",
   CATEGORIES: "/categories",
@@ -14,17 +15,25 @@ export const PREFIX = {
 };
 
 export const ROUTES = {
-  overview: PREFIX.ROOT,
-  productsList: PREFIX.PRODUCTS,
-  productNew: `${PREFIX.PRODUCTS}/new`,
-  productEdit: (id = ":id") => `${PREFIX.PRODUCTS}/${id}`,
-  categories: PREFIX.CATEGORIES,
-  brands: PREFIX.BRANDS,
-  attributes: PREFIX.ATTRIBUTES,
-  orders: PREFIX.ORDERS,
-  coupons: PREFIX.COUPONS,
-  pages: PREFIX.PAGES,
-  banners: PREFIX.BANNERS,
-  settings: PREFIX.SETTINGS,
-  system: PREFIX.SYSTEM,
+  overview: () => P.ROOT,
+
+  productsList: () => P.PRODUCTS,
+  productNew: () => `${P.PRODUCTS}/new`,
+  productEdit: (id = ":id") => `${P.PRODUCTS}/${id}`,
+
+  categories: () => P.CATEGORIES,
+  brands: () => P.BRANDS,
+  attributes: () => P.ATTRIBUTES,
+
+  orders: () => P.ORDERS,
+  coupons: () => P.COUPONS,
+
+  pages: () => P.PAGES,
+  banners: () => P.BANNERS,
+
+  settings: () => P.SETTINGS,
+  system: () => P.SYSTEM,
 };
+
+// Optional: named params helper if you like objects
+export const withId = (base, id) => base(id);
