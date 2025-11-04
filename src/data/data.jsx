@@ -1,39 +1,41 @@
-// src/data/data.jsx
-const P = {
-  ROOT: "/",
-  PRODUCTS: "/products",
-  CATEGORIES: "/categories",
-  BRANDS: "/brands",
-  ATTRIBUTES: "/attributes",
-  ORDERS: "/orders",
-  COUPONS: "/coupons",
-  CONTENT: "/content",
-  PAGES: "/content/pages",
-  BANNERS: "/content/banners",
-  SETTINGS: "/settings",
-  SYSTEM: "/system",
-};
-
+// Central route strings used by the sidebar
 export const ROUTES = {
-  overview: () => P.ROOT,
+  // Overview
+  overview: "/",
 
-  productsList: () => P.PRODUCTS,
-  productNew: () => `${P.PRODUCTS}/new`,
-  productEdit: (id = ":id") => `${P.PRODUCTS}/${id}`,
+  // Catalog
+  products: "/products",
+  productNew: "/products/new",
+  productEdit: "/products/:id",
+  categories: "/categories",
+  brands: "/brands",
+  attributes: "/attributes",
 
-  categories: () => P.CATEGORIES,
-  brands: () => P.BRANDS,
-  attributes: () => P.ATTRIBUTES,
+  // Media
+  productImages: "/media/product-images",
+  colorImages: "/media/color-images",
 
-  orders: () => P.ORDERS,
-  coupons: () => P.COUPONS,
+  // Orders
+  orders: "/orders",
+  shipments: "/orders/shipments",
+  payments: "/orders/payments",
 
-  pages: () => P.PAGES,
-  banners: () => P.BANNERS,
+  // Promotions
+  coupons: "/promotions/coupons",
 
-  settings: () => P.SETTINGS,
-  system: () => P.SYSTEM,
+  // Customers
+  users: "/customers/users",
+
+  // Content
+  pages: "/content/pages",
+  banners: "/content/banners",
+
+  // Settings
+  settingsAudiences: "/settings/audiences",
+  settingsShippingTaxes: "/settings/shipping-taxes",
+  settingsTeamRoles: "/settings/team-roles",
+
+  // System
+  systemActivity: "/system/activity",
+  systemQueue: "/system/queue",
 };
-
-// Optional: named params helper if you like objects
-export const withId = (base, id) => base(id);
