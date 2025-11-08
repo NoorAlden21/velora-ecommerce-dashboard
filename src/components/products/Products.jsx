@@ -42,65 +42,10 @@ import {
   SelectContent,
   SelectItem,
 } from "../ui/select";
+import { ROUTES } from "@/data/data";
+import { NavLink } from "react-router-dom";
 
-const MOCK_PRODUCTS = [
-  {
-    id: "1",
-    image:
-      "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?w=200&q=80",
-    title: "Nordic Minimal Chair",
-    sku: "NMC-001",
-    category: "Chairs",
-    brand: "Nordic Living",
-    price: 349,
-    compareAtPrice: 449,
-    status: "active",
-    stock: 127,
-    updatedAt: "2025-10-25",
-  },
-  {
-    id: "2",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80",
-    title: "CloudStride Pro Running Shoes",
-    sku: "CSP-001",
-    category: "Running Shoes",
-    brand: "Urban Sports",
-    price: 159,
-    compareAtPrice: 189,
-    status: "active",
-    stock: 28,
-    updatedAt: "2025-10-26",
-  },
-  {
-    id: "3",
-    image:
-      "https://images.unsplash.com/photo-1518443781045-7d3cd339a1ab?w=200&q=80",
-    title: "TechSound ANC Pro Headphones",
-    sku: "TSA-001",
-    category: "Headphones",
-    brand: "TechSound",
-    price: 299,
-    compareAtPrice: null,
-    status: "active",
-    stock: 68,
-    updatedAt: "2025-10-24",
-  },
-  {
-    id: "6",
-    image:
-      "https://images.unsplash.com/photo-1603808033192-6f0f4b5b6f0c?w=200&q=80",
-    title: "Artisan Ceramic Mug Set",
-    sku: "ACM-SET-4",
-    category: "Drinkware",
-    brand: "Kiln & Co",
-    price: 68,
-    compareAtPrice: null,
-    status: "draft",
-    stock: 0,
-    updatedAt: "2025-10-27",
-  },
-];
+import { useGetProductsQuery } from "@/Slice/ProductsSlice";
 
 const filterSchema = z.object({
   status: z.enum(["all", "active", "draft"]).default("all"),
@@ -159,7 +104,11 @@ function applyFilters(products, q, f) {
   });
 }
 
-export default function ProductsPage() {
+export default function Products() {
+  const { data, isLoading, isError, refetch } = useGetProductsQuery();
+  const products = data?.items ?? [];
+  const total = data?.total ?? products.length;
+
   const [query, setQuery] = useState("");
   const form = useForm({
     resolver: zodResolver(filterSchema),
@@ -176,7 +125,7 @@ export default function ProductsPage() {
     return res.success ? res.data : DEFAULT_FILTERS;
   }, [liveRaw]);
 
-  const products = MOCK_PRODUCTS;
+  // const products = MOCK_PRODUCTS;
   const filtered = useMemo(
     () => applyFilters(products, query, liveParsed),
     [products, query, liveParsed]
@@ -192,6 +141,33 @@ export default function ProductsPage() {
     [products]
   );
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-7 w-48 bg-muted animate-pulse rounded" />
+        <Card>
+          <div className="h-72 animate-pulse" />
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Products</h1>
+          <Button onClick={() => refetch()}>Retry</Button>
+        </div>
+        <Card>
+          <div className="p-4 text-sm text-red-600">
+            Couldn’t load products.
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <FormProvider {...form}>
       <div className="space-y-4">
@@ -202,7 +178,9 @@ export default function ProductsPage() {
               Manage your products
             </p>
           </div>
-          <Button>+ Add Product</Button>
+          <NavLink to={ROUTES.productNew}>
+            <Button>+ Add Product</Button>
+          </NavLink>
         </div>
 
         <Card>
@@ -225,7 +203,7 @@ export default function ProductsPage() {
           <CardContent>
             <ProductsTable products={filtered} />
             <div className="text-center text-sm text-muted-foreground mt-4">
-              Showing {filtered.length} of {products.length} products
+              Showing {filtered.length} of {total} products
             </div>
           </CardContent>
         </Card>
@@ -253,12 +231,26 @@ function ProductsTable({ products }) {
       <TableBody>
         {products.map((p) => (
           <TableRow key={p.id}>
-            <TableCell>
+            {/* <TableCell>
               <img
                 src={p.image}
                 alt={p.title}
                 className="h-10 w-10 object-cover"
               />
+            </TableCell> */}
+
+            <TableCell>
+              {p.image ? (
+                <img
+                  src={p.image}
+                  alt={p.title}
+                  className="h-10 w-10 object-cover rounded"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                  {p.title?.[0] ?? "–"}
+                </div>
+              )}
             </TableCell>
             <TableCell className="font-medium">{p.title}</TableCell>
             <TableCell>{p.sku}</TableCell>

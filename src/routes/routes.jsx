@@ -1,12 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { ROUTES } from "../data/data";
-import ProductsPage from "@/components/products/ProductsPage";
+import Products from "@/components/products/Products";
+import NewProduct from "@/components/products/NewProduct";
 
 // tiny placeholders for now
 const Overview = () => <h1 className="text-xl font-semibold">Overview</h1>;
 // const ProductsList = () => <h1 className="text-xl font-semibold">Products</h1>;
-const ProductNew = () => <h1 className="text-xl font-semibold">New Product</h1>;
+//const ProductNew = () => <h1 className="text-xl font-semibold">New Product</h1>;
 const ProductEdit = () => (
   <h1 className="text-xl font-semibold">Edit Product</h1>
 );
@@ -37,8 +38,8 @@ export default function AppRoutes() {
           <Route path={ROUTES.overview} element={<Overview />} />
 
           {/* Catalog */}
-          <Route path={ROUTES.products} element={<ProductsPage />} />
-          <Route path={ROUTES.productNew} element={<ProductNew />} />
+          <Route path={ROUTES.products} element={<Products />} />
+          <Route path={ROUTES.productNew} element={<NewProduct />} />
           <Route path={ROUTES.productEdit} element={<ProductEdit />} />
           <Route path={ROUTES.categories} element={<Categories />} />
           <Route path={ROUTES.brands} element={<Brands />} />
