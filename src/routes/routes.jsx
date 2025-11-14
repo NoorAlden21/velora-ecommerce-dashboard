@@ -1,13 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { ROUTES } from "../data/data";
+
 import Products from "@/components/products/Products";
 import NewProduct from "@/components/products/NewProduct";
 
-// tiny placeholders for now
+import RequireAuth from "@/components/auth/RequireAuth";
+import Login from "@/components/auth/Login";
+
 const Overview = () => <h1 className="text-xl font-semibold">Overview</h1>;
-// const ProductsList = () => <h1 className="text-xl font-semibold">Products</h1>;
-//const ProductNew = () => <h1 className="text-xl font-semibold">New Product</h1>;
 const ProductEdit = () => (
   <h1 className="text-xl font-semibold">Edit Product</h1>
 );
@@ -32,57 +33,62 @@ const SystemQueue = () => <div>Queue</div>;
 export default function AppRoutes() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          {/* Overview */}
-          <Route path={ROUTES.overview} element={<Overview />} />
+      <Routes>
+        {/* Public route */}
+        <Route path={ROUTES.login} element={<Login />} />
 
-          {/* Catalog */}
-          <Route path={ROUTES.products} element={<Products />} />
-          <Route path={ROUTES.productNew} element={<NewProduct />} />
-          <Route path={ROUTES.productEdit} element={<ProductEdit />} />
-          <Route path={ROUTES.categories} element={<Categories />} />
-          <Route path={ROUTES.brands} element={<Brands />} />
-          <Route path={ROUTES.attributes} element={<Attributes />} />
+        {/* Protected routes */}
+        <Route element={<RequireAuth />}>
+          <Route element={<Layout />}>
+            <Route path={ROUTES.overview} element={<Overview />} />
 
-          {/* Media */}
-          <Route path={ROUTES.productImages} element={<ProductImages />} />
-          <Route path={ROUTES.colorImages} element={<ColorImages />} />
+            {/* Catalog */}
+            <Route path={ROUTES.products} element={<Products />} />
+            <Route path={ROUTES.productNew} element={<NewProduct />} />
+            <Route path={ROUTES.productEdit} element={<ProductEdit />} />
+            <Route path={ROUTES.categories} element={<Categories />} />
+            <Route path={ROUTES.brands} element={<Brands />} />
+            <Route path={ROUTES.attributes} element={<Attributes />} />
 
-          {/* Orders */}
-          <Route path={ROUTES.orders} element={<Orders />} />
-          <Route path={ROUTES.shipments} element={<Shipments />} />
-          <Route path={ROUTES.payments} element={<Payments />} />
+            {/* Media */}
+            <Route path={ROUTES.productImages} element={<ProductImages />} />
+            <Route path={ROUTES.colorImages} element={<ColorImages />} />
 
-          {/* Promotions */}
-          <Route path={ROUTES.coupons} element={<Coupons />} />
+            {/* Orders */}
+            <Route path={ROUTES.orders} element={<Orders />} />
+            <Route path={ROUTES.shipments} element={<Shipments />} />
+            <Route path={ROUTES.payments} element={<Payments />} />
 
-          {/* Customers */}
-          <Route path={ROUTES.users} element={<Users />} />
+            {/* Promotions */}
+            <Route path={ROUTES.coupons} element={<Coupons />} />
 
-          {/* Content */}
-          <Route path={ROUTES.pages} element={<Pages />} />
-          <Route path={ROUTES.banners} element={<Banners />} />
+            {/* Customers */}
+            <Route path={ROUTES.users} element={<Users />} />
 
-          {/* Settings */}
-          <Route
-            path={ROUTES.settingsAudiences}
-            element={<SettingsAudiences />}
-          />
-          <Route
-            path={ROUTES.settingsShippingTaxes}
-            element={<SettingsShippingTaxes />}
-          />
-          <Route
-            path={ROUTES.settingsTeamRoles}
-            element={<SettingsTeamRoles />}
-          />
+            {/* Content */}
+            <Route path={ROUTES.pages} element={<Pages />} />
+            <Route path={ROUTES.banners} element={<Banners />} />
 
-          {/* System */}
-          <Route path={ROUTES.systemActivity} element={<SystemActivity />} />
-          <Route path={ROUTES.systemQueue} element={<SystemQueue />} />
-        </Routes>
-      </Layout>
+            {/* Settings */}
+            <Route
+              path={ROUTES.settingsAudiences}
+              element={<SettingsAudiences />}
+            />
+            <Route
+              path={ROUTES.settingsShippingTaxes}
+              element={<SettingsShippingTaxes />}
+            />
+            <Route
+              path={ROUTES.settingsTeamRoles}
+              element={<SettingsTeamRoles />}
+            />
+
+            {/* System */}
+            <Route path={ROUTES.systemActivity} element={<SystemActivity />} />
+            <Route path={ROUTES.systemQueue} element={<SystemQueue />} />
+          </Route>
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

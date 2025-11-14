@@ -8,9 +8,14 @@ import {
   useFormContext,
 } from "react-hook-form";
 
+import { NavLink, useNavigate } from "react-router-dom";
+
 import { ROUTES } from "@/data/data";
 
-import { useGetProductFormMetaQuery } from "@/Slice/ProductsSlice";
+import {
+  useGetProductFormMetaQuery,
+  useCreateProductMutation,
+} from "@/Slice/ProductsSlice";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +37,6 @@ import { Textarea } from "../ui/textarea";
 import { Switch } from "../ui/switch";
 
 import { Eye, Save, ArrowLeft, Upload, Plus, Trash2 } from "lucide-react";
-import { NavLink } from "react-router-dom";
 
 // ---------- helpers ----------
 const toIntOrNull = (v) => {
@@ -40,10 +44,28 @@ const toIntOrNull = (v) => {
   return Number.isFinite(n) ? n : null;
 };
 
+const emptyStrToUndef = z.literal("").transform(() => undefined);
+
+// رقم اختياري (cents) بدون تحويل "" إلى 0
+const optionalCents = z
+  .union([emptyStrToUndef, z.coerce.number().int().min(0)])
+  .optional();
+
+// عملة اختيارية: "" ← undefined ، غير ذلك 3 أحرف وتتحول Uppercase
+const optionalCurrency = z
+  .union([emptyStrToUndef, z.string().length(3)])
+  .transform((v) => (v ? v.toUpperCase() : undefined))
+  .optional();
+
+// URL اختياري: "" ← undefined
+const optionalUrl = z
+  .union([emptyStrToUndef, z.string().url("invalid url")])
+  .optional();
+
 // ---------- schemas ----------
 const basicsSchema = z.object({
   title: z.string().min(1, "title is required"),
-  slug: z.string().min(1, "slug is required"),
+  slug: z.string(),
   status: z.enum(["draft", "active"]).default("draft"),
   brandId: z.string().optional(),
   primaryCategoryId: z.string().min(1, "primary category is required"),
@@ -87,18 +109,25 @@ const variantPairSchema = z.object({
   option_value_id: z.coerce.number(),
 });
 
-const variantSchema = z.object({
-  option_values: z.array(variantPairSchema).min(1),
-  sku: z.string().optional(),
-  price_cents: z.coerce.number().min(0).optional(),
-  currency: z.string().length(3).optional(),
-  stock: z.coerce.number().min(0),
-  is_active: z.boolean().default(true),
-});
+const variantSchema = z
+  .object({
+    option_values: z.array(variantPairSchema).min(1, "اختر قيمة/قيم للخيارات"),
+    sku: z.string().optional(),
+    price_cents: optionalCents,
+    currency: optionalCurrency,
+    stock: z.coerce.number().int().min(0),
+    is_active: z.boolean().default(true),
+  })
+  .refine(
+    (v) =>
+      (v.price_cents === undefined && v.currency === undefined) ||
+      (v.price_cents !== undefined && v.currency !== undefined),
+    { path: ["currency"], message: "لو وضعت سعرًا مخصصًا يجب إدخال العملة." }
+  );
 
 const colorImageSchema = z.object({
   option_value_id: z.coerce.number(),
-  url: z.string().url().optional(),
+  url: optionalUrl,
   file: z.any().optional(),
   position: z.coerce.number().min(0).optional(),
 });
@@ -131,12 +160,15 @@ const DEFAULTS = {
 };
 
 export default function NewProduct() {
+  const navigate = useNavigate();
+
   const {
     data: meta,
     isLoading: loading,
     isError: error,
   } = useGetProductFormMetaQuery();
 
+  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const methods = useForm({
     resolver: zodResolver(productSchema),
     defaultValues: DEFAULTS,
@@ -170,8 +202,17 @@ export default function NewProduct() {
     return options.filter((o) => !selectedOptionIds.includes(o.id));
   }, [options, selectedOptionIds]);
 
+  const onInvalid = (errs) => {
+    console.log("❌ form invalid", errs);
+    if (errs?.variants) setTab("optionsAndVariants");
+    else if (errs?.color_images) setTab("imagesByColor");
+    else setTab("basics");
+  };
+
   // SUBMIT
   const onSubmit = async (values) => {
+    console.log("Submitting…", values);
+
     const payload = {
       name: values.title,
       slug: values.slug || null,
@@ -215,12 +256,18 @@ export default function NewProduct() {
       }
     });
     form.append("data", JSON.stringify(payload));
-
-    // const res = await fetch("/api/admin/products", { method: "POST", body: form });
-    // const json = await res.json();
-    // console.log("API RESULT", res.status, json);
-
-    console.log("SUBMIT => ready FormData", payload);
+    try {
+      const res = await createProduct(form).unwrap();
+      if (res.success) {
+        console.log("sent");
+      }
+      // success → go back to list (or to edit page if your API returns the product)
+      navigate(ROUTES.products);
+    } catch (e) {
+      console.error("Create product failed:", e);
+      // show a toast or inline error if you have a toaster
+      // toast.error(e?.data?.message ?? "Failed to create product");
+    }
   };
 
   if (loading) {
@@ -241,7 +288,11 @@ export default function NewProduct() {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
+      <form
+        onSubmit={handleSubmit(onSubmit, onInvalid)}
+        noValidate
+        className="space-y-6 "
+      >
         <div className="flex items-center justify-between py-2">
           <div className="flex items-center justify-between gap-x-5">
             <NavLink to={ROUTES.products}>
@@ -340,7 +391,7 @@ export default function NewProduct() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Slug *</Label>
+                  <Label>Slug </Label>
                   <Input
                     className="bg-neutral-100"
                     placeholder="product-url-slug"
@@ -724,9 +775,7 @@ function VariantRow({ vIdx, removeVariant, allOptions }) {
           <Input
             type="number"
             placeholder="leave blank to inherit"
-            {...register(`variants.${vIdx}.price_cents`, {
-              valueAsNumber: true,
-            })}
+            {...register(`variants.${vIdx}.price_cents`)}
           />
         </div>
         <div className="space-y-1">

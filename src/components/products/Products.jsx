@@ -224,7 +224,6 @@ function ProductsTable({ products }) {
           <TableHead>Brand</TableHead>
           <TableHead className="text-right">Price</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead className="text-right">Stock</TableHead>
           <TableHead>Updated</TableHead>
         </TableRow>
       </TableHeader>
@@ -270,19 +269,6 @@ function ProductsTable({ products }) {
               <Badge variant={p.status === "active" ? "default" : "secondary"}>
                 {p.status === "active" ? "Active" : "Draft"}
               </Badge>
-            </TableCell>
-            <TableCell className="text-right">
-              <span
-                className={
-                  p.stock === 0
-                    ? "text-red-600"
-                    : p.stock <= 50
-                    ? "text-amber-600"
-                    : ""
-                }
-              >
-                {p.stock}
-              </span>
             </TableCell>
             <TableCell>{new Date(p.updatedAt).toLocaleDateString()}</TableCell>
           </TableRow>

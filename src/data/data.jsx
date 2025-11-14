@@ -1,5 +1,6 @@
-// Central route strings used by the sidebar
 export const ROUTES = {
+  login: "/login",
+
   // Overview
   overview: "/",
 
